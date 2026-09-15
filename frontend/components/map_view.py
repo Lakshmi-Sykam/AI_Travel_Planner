@@ -57,7 +57,7 @@ def render_interactive_map(itinerary: dict, origin: str, destination: str):
     m = folium.Map(
         location=dest_center,
         zoom_start=11,
-        tiles="CartoDB positron",
+        tiles="OpenStreetMap",
         control_scale=True
     )
 
