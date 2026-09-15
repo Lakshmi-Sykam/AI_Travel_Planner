@@ -1,4 +1,12 @@
 import os
+import sys
+from pathlib import Path
+
+# Ensure frontend directory is in python search path
+CURRENT_DIR = Path(__file__).parent.resolve()
+if str(CURRENT_DIR) not in sys.path:
+    sys.path.insert(0, str(CURRENT_DIR))
+
 import streamlit as st
 import httpx
 import json
@@ -6,11 +14,6 @@ import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
 
-import importlib
-import components.booking_links
-import components.auth_ui
-importlib.reload(components.booking_links)
-importlib.reload(components.auth_ui)
 from components.booking_links import render_booking_hub
 from components.export_pdf import generate_pdf_itinerary
 from components.export_calendar import generate_ics_calendar
