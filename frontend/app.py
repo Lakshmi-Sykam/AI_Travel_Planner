@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import httpx
 import json
@@ -171,7 +172,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-BACKEND_URL = "http://127.0.0.1:8000"
+try:
+    BACKEND_URL = st.secrets.get("BACKEND_URL", os.getenv("BACKEND_URL", "http://127.0.0.1:8000")).rstrip("/")
+except Exception:
+    BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
 
 # Session State Initialization
 if "current_trip" not in st.session_state:

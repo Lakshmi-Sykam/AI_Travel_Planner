@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ai-travel-planner-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: DATABASE_URL
+        value: sqlite:///./travel_planner.db
+      - key: SECRET_KEY
+        generateValue: true
