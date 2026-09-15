@@ -99,15 +99,20 @@ Open your browser at: `http://localhost:8501`
 
 ---
 
-## 🧪 Testing the Workflow
+## ☁️ Streamlit Cloud Deployment (1-Click)
 
-You can test planning a trip with an example query:
-- **Origin:** Mumbai
-- **Destination:** Goa
-- **Duration:** 4 Days
-- **Budget:** ₹20,000
-- **Style:** Budget / Backpacker
-- **Interests:** Beaches, Local Food, Heritage
+This application is configured for standalone 1-click deployment on **Streamlit Community Cloud**:
+
+1. Fork or push this repository to your GitHub account.
+2. Go to **[share.streamlit.io](https://share.streamlit.io/)** and click **New app**.
+3. Select your repository: `Lakshmi-Sykam/AI_Travel_Planner`
+4. Set **Main file path** to `frontend/app.py`.
+5. Under **Advanced settings ➔ Secrets**, add your Groq API key:
+   ```toml
+   GROQ_API_KEY = "gsk_your_groq_api_key_here"
+   GROQ_MODEL = "llama-3.3-70b-versatile"
+   ```
+6. Click **Deploy!**
 
 ---
 *Created with ❤️ for intelligent, autonomous travel planning.*
