@@ -305,9 +305,13 @@ def fetch_saved_trips(mine_only: bool = False):
 
 # Sidebar
 with st.sidebar:
-    st.image("https://img.icons8.com/isometric/100/airplane-take-off.png", width=60)
-    st.title("Travel Agent AI")
-    st.caption("Multi-Agent Itinerary Orchestrator")
+    st.markdown("""
+    <div style="margin-bottom: 12px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.12); border: 1.5px solid rgba(2, 132, 199, 0.3);">
+        <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80" style="width: 100%; height: 110px; object-fit: cover; display: block;">
+    </div>
+    """, unsafe_allow_html=True)
+    st.title("✈️ Travel Agent AI")
+    st.caption("Autonomous Multi-Agent Itinerary Orchestrator")
     
     # User Profile & Logout Widget
     render_user_profile_sidebar()
@@ -498,21 +502,29 @@ with tab_create:
                             "itinerary": data["itinerary"]
                         }
                         st.session_state.agent_logs = data.get("raw_logs", {}).get("logs", [])
-                        status.update(label="✅ Itinerary Successfully Generated!", state="complete", expanded=False)
+                        status.update(label="✈️ Flight & Journey Cleared for Takeoff!", state="complete", expanded=False)
                         
-                        # High-resolution destination travel image card
+                        # High-resolution Flight Takeoff Showcase Card
                         dest_img_url = get_destination_image(destination)
                         st.markdown(f"""
-                        <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 58, 138, 0.85) 100%), url('{dest_img_url}'); background-size: cover; background-position: center; border-radius: 16px; padding: 26px; color: white; margin: 18px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.18); text-shadow: 0 2px 8px rgba(0,0,0,0.6);">
-                            <div style="display: inline-flex; align-items: center; gap: 6px; background: #10b981; color: white; padding: 4px 14px; border-radius: 9999px; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 10px;">
-                                ✨ TRIP READY
-                            </div>
-                            <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: #ffffff;">🌟 Your Adventure to {destination} is Ready!</h2>
-                            <p style="margin: 8px 0 12px 0; font-size: 1.02rem; opacity: 0.95;">
-                                {duration_days} Days Journey from <b>{origin}</b> with {group_size} {'traveler' if int(group_size)==1 else 'travelers'} • Budget: <b>{curr_code} {budget:,.0f}</b>
-                            </p>
-                            <div style="font-size: 0.92rem; color: #38bdf8; font-weight: 700;">
-                                👉 Switch to the <b>📋 Itinerary Dashboard</b> tab above to view your full day-by-day plan, interactive map & 1-click booking hub!
+                        <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(2, 132, 199, 0.82) 100%), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; border-radius: 18px; padding: 26px; color: white; margin: 18px 0; box-shadow: 0 12px 30px rgba(2, 132, 199, 0.25); border: 1.5px solid rgba(56, 189, 248, 0.4);">
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px;">
+                                <div>
+                                    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.25); border: 1px solid #38bdf8; color: #e0f2fe; padding: 4px 14px; border-radius: 9999px; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.6px; margin-bottom: 10px;">
+                                        ✈️ FLIGHT & ROUTE READY FOR TAKEOFF
+                                    </div>
+                                    <h2 style="margin: 0; font-size: 2.0rem; font-weight: 900; color: #ffffff; text-shadow: 0 3px 12px rgba(0,0,0,0.6);">
+                                        🛫 {origin} ➔ 🛬 {destination}
+                                    </h2>
+                                    <p style="margin: 8px 0 0 0; font-size: 1.05rem; opacity: 0.95; text-shadow: 0 2px 6px rgba(0,0,0,0.6);">
+                                        {duration_days} Days Adventure • 👥 {group_size} {'Traveler' if int(group_size)==1 else 'Travelers'} • Budget: <b>{curr_code} {budget:,.0f}</b>
+                                    </p>
+                                </div>
+                                <div style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(10px); padding: 14px 22px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.25); text-align: center;">
+                                    <div style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Next Step</div>
+                                    <div style="font-size: 1.05rem; color: #38bdf8; font-weight: 800; margin-top: 2px;">Switch to Tab 2 📋</div>
+                                    <div style="font-size: 0.78rem; color: #e2e8f0; margin-top: 2px;">View Day Plans & Map</div>
+                                </div>
                             </div>
                         </div>
                         """, unsafe_allow_html=True)
