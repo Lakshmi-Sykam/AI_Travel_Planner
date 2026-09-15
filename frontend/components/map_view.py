@@ -1,11 +1,14 @@
+import re
 import folium
 import streamlit as st
 from streamlit_folium import st_folium
 
+# Major City Coordinates (for Origin and Destination resolution)
 CITY_COORDINATES = {
     "goa": (15.2993, 74.1240),
     "mumbai": (19.0760, 72.8777),
     "delhi": (28.6139, 77.2090),
+    "new delhi": (28.6139, 77.2090),
     "bangalore": (12.9716, 77.5946),
     "bengaluru": (12.9716, 77.5946),
     "hyderabad": (17.3850, 78.4867),
@@ -17,6 +20,15 @@ CITY_COORDINATES = {
     "shimla": (31.1048, 77.1734),
     "kerala": (10.8505, 76.2711),
     "munnar": (10.0889, 77.0595),
+    "kochi": (9.9312, 76.2673),
+    "agra": (27.1767, 78.0081),
+    "varanasi": (25.3176, 82.9739),
+    "amritsar": (31.6340, 74.8723),
+    "rishikesh": (30.0869, 78.2676),
+    "pune": (18.5204, 73.8567),
+    "tirupati": (13.6288, 79.4192),
+    "ooty": (11.4102, 76.6950),
+    "kodaikanal": (10.2381, 77.4892),
     "paris": (48.8566, 2.3522),
     "london": (51.5074, -0.1278),
     "tokyo": (35.6762, 139.6503),
@@ -32,28 +44,75 @@ CITY_COORDINATES = {
     "barcelona": (41.3879, 2.1699),
 }
 
-def resolve_location(name: str, fallback_center=(15.2993, 74.1240), offset_seed=0):
+# Accurate Regional Landmarks (anchored within destination zones)
+LANDMARK_COORDINATES = {
+    # Goa Landmarks
+    "panaji": (15.4909, 73.8278),
+    "panjim": (15.4909, 73.8278),
+    "baga": (15.5553, 73.7517),
+    "calangute": (15.5439, 73.7553),
+    "anjuna": (15.5800, 73.7400),
+    "vagator": (15.5997, 73.7380),
+    "candolim": (15.5186, 73.7663),
+    "aguada": (15.4925, 73.7736),
+    "chapora": (15.6058, 73.7358),
+    "old goa": (15.5030, 73.9110),
+    "bom jesus": (15.5009, 73.9116),
+    "dudhsagar": (15.3144, 74.3143),
+    "palolem": (15.0100, 74.0232),
+    "colva": (15.2783, 73.9167),
+    "miramar": (15.4833, 73.8117),
+    "fontainhas": (15.4960, 73.8320),
+    "arambol": (15.6853, 73.7042),
+    "morjim": (15.6322, 73.7297),
+    "mandovi": (15.4990, 73.8250),
+    "south goa": (15.2500, 74.0000),
+    "north goa": (15.5500, 73.7600),
+    "promenade": (15.4950, 73.8300),
+    "donapaula": (15.4539, 73.8052),
+    "dona paula": (15.4539, 73.8052),
+    "sinquerim": (15.4980, 73.7690),
+    "benaulim": (15.2580, 73.9210),
+    "salcete": (15.2900, 73.9800),
+}
+
+def resolve_city(name: str, fallback=(15.2993, 74.1240)):
     """
-    Resolve latitude and longitude for a city or landmark.
+    Resolve origin and destination using exact word boundary matching.
+    Prevents false substring matches like 'rome' matching 'promenade'.
     """
-    clean_name = str(name).lower().strip()
+    clean = str(name).lower().strip()
     for city, coords in CITY_COORDINATES.items():
-        if city in clean_name:
+        if re.search(rf"\b{re.escape(city)}\b", clean):
+            return coords
+    return fallback
+
+def resolve_activity_location(name: str, dest_center: tuple, offset_seed: int = 0):
+    """
+    Resolve local activity and hotel coordinates.
+    Guaranteed to stay anchored within the destination area.
+    """
+    clean = str(name).lower().strip()
+
+    # 1. Match local destination landmarks first
+    for landmark, coords in LANDMARK_COORDINATES.items():
+        if re.search(rf"\b{re.escape(landmark)}\b", clean):
             return coords
 
-    base_lat, base_lng = fallback_center
-    jitter_lat = ((hash(clean_name + str(offset_seed)) % 100) - 50) * 0.0008
-    jitter_lng = ((hash(clean_name + str(offset_seed + 7)) % 100) - 50) * 0.0008
+    # 2. Local realistic jitter around the destination center (within ~5-8km)
+    base_lat, base_lng = dest_center
+    jitter_lat = ((hash(clean + str(offset_seed)) % 100) - 50) * 0.0007
+    jitter_lng = ((hash(clean + str(offset_seed + 7)) % 100) - 50) * 0.0007
     return (base_lat + jitter_lat, base_lng + jitter_lng)
 
 def render_interactive_map(itinerary: dict, origin: str, destination: str):
     """
     Renders an interactive Leaflet/Folium map with trip routes, hotel markers, and daily activity pins.
     """
-    dest_center = resolve_location(destination, fallback_center=(15.2993, 74.1240))
-    origin_coords = resolve_location(origin, fallback_center=(19.0760, 72.8777))
+    dest_center = resolve_city(destination, fallback=(15.2993, 74.1240))
+    origin_coords = resolve_city(origin, fallback=(19.0760, 72.8777))
 
-    # Initialize Folium Map
+    # Initialize Folium Map centered on the Destination
     m = folium.Map(
         location=dest_center,
         zoom_start=11,
@@ -61,7 +120,7 @@ def render_interactive_map(itinerary: dict, origin: str, destination: str):
         control_scale=True
     )
 
-    # Route from Origin to Destination (if distinct)
+    # Route from Origin to Destination (if distinct and within same country/region)
     if origin_coords != dest_center:
         folium.PolyLine(
             locations=[origin_coords, dest_center],
@@ -90,7 +149,7 @@ def render_interactive_map(itinerary: dict, origin: str, destination: str):
         hotel_name = hotel.get("name") or hotel.get("hotel_name", f"Hotel in {destination}")
         hotel_cost = hotel.get("price_per_night", "")
         hotel_loc = hotel.get("area_or_neighborhood", destination)
-        hotel_coords = resolve_location(hotel_name, fallback_center=dest_center, offset_seed=100 + h_idx)
+        hotel_coords = resolve_activity_location(f"{hotel_name} {hotel_loc}", dest_center, offset_seed=100 + h_idx)
         
         hotel_popup_html = f"""
         <div style='font-family: sans-serif; min-width: 180px;'>
@@ -136,9 +195,9 @@ def render_interactive_map(itinerary: dict, origin: str, destination: str):
             act_cost = act.get("cost", 0)
             loc_hint = act.get("location") or f"{act_title}, {destination}"
             
-            slot_coords = resolve_location(
-                loc_hint, 
-                fallback_center=dest_center, 
+            slot_coords = resolve_activity_location(
+                f"{act_title} {loc_hint}", 
+                dest_center=dest_center, 
                 offset_seed=(d_idx * 15) + a_idx + 1
             )
             circuit_points.append(slot_coords)
@@ -161,7 +220,7 @@ def render_interactive_map(itinerary: dict, origin: str, destination: str):
                 icon=folium.Icon(color=color, icon="star", prefix="fa")
             ).add_to(m)
 
-    # Render day circuit polyline
+    # Render day sightseeing circuit polyline (only connecting local destination points)
     if len(circuit_points) > 2:
         folium.PolyLine(
             locations=circuit_points[1:],
@@ -169,7 +228,7 @@ def render_interactive_map(itinerary: dict, origin: str, destination: str):
             weight=2.5,
             opacity=0.6,
             dash_array="4, 6",
-            tooltip="🗺️ Recommended Sightseeing Route"
+            tooltip="🗺️ Recommended Sightseeing Route in Destination"
         ).add_to(m)
 
     st_folium(m, width="100%", height=450, returned_objects=[])
