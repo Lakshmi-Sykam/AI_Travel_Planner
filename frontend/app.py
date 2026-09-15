@@ -255,6 +255,32 @@ if not st.session_state.auth_token or not st.session_state.user_info:
     render_login_page(BACKEND_URL)
     st.stop()
 
+def get_destination_image(destination: str) -> str:
+    """Returns a high-quality travel scenic image matching destination."""
+    clean = str(destination).lower().strip()
+    images = {
+        "goa": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80",
+        "mumbai": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80",
+        "delhi": "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1200&q=80",
+        "manali": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=1200&q=80",
+        "shimla": "https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=1200&q=80",
+        "kerala": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80",
+        "munnar": "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&w=1200&q=80",
+        "jaipur": "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1200&q=80",
+        "udaipur": "https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?auto=format&fit=crop&w=1200&q=80",
+        "varanasi": "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80",
+        "paris": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80",
+        "dubai": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80",
+        "bali": "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80",
+        "singapore": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=1200&q=80",
+        "tokyo": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80",
+        "london": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80",
+    }
+    for city, img in images.items():
+        if city in clean:
+            return img
+    return "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80"
+
 # Helper: Check backend status
 def check_backend():
     try:
@@ -473,8 +499,23 @@ with tab_create:
                         }
                         st.session_state.agent_logs = data.get("raw_logs", {}).get("logs", [])
                         status.update(label="✅ Itinerary Successfully Generated!", state="complete", expanded=False)
-                        st.balloons()
-                        st.success("Your plan is ready! Switch to the **📋 Itinerary Dashboard** tab to view.")
+                        
+                        # High-resolution destination travel image card
+                        dest_img_url = get_destination_image(destination)
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 58, 138, 0.85) 100%), url('{dest_img_url}'); background-size: cover; background-position: center; border-radius: 16px; padding: 26px; color: white; margin: 18px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.18); text-shadow: 0 2px 8px rgba(0,0,0,0.6);">
+                            <div style="display: inline-flex; align-items: center; gap: 6px; background: #10b981; color: white; padding: 4px 14px; border-radius: 9999px; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 10px;">
+                                ✨ TRIP READY
+                            </div>
+                            <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: #ffffff;">🌟 Your Adventure to {destination} is Ready!</h2>
+                            <p style="margin: 8px 0 12px 0; font-size: 1.02rem; opacity: 0.95;">
+                                {duration_days} Days Journey from <b>{origin}</b> with {group_size} {'traveler' if int(group_size)==1 else 'travelers'} • Budget: <b>{curr_code} {budget:,.0f}</b>
+                            </p>
+                            <div style="font-size: 0.92rem; color: #38bdf8; font-weight: 700;">
+                                👉 Switch to the <b>📋 Itinerary Dashboard</b> tab above to view your full day-by-day plan, interactive map & 1-click booking hub!
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     else:
                         status.update(label="❌ Failed to generate plan", state="error")
                         st.error(f"Error {res.status_code}: {res.text}")
@@ -492,8 +533,21 @@ with tab_itinerary:
         budget_data = itinerary.get("budget_breakdown", {})
         g_size = current.get("group_size", 1)
 
-        # Header summary
-        st.markdown(f"## 📍 {current['origin']} to {current['destination']} ({current['duration_days']} Days • 👥 {g_size} {'Member' if g_size == 1 else 'Members'})")
+        # Destination Hero Banner Image Card
+        dest_hero_img = get_destination_image(current['destination'])
+        st.markdown(f"""
+        <div style="background: linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.88) 100%), url('{dest_hero_img}'); background-size: cover; background-position: center; border-radius: 16px; padding: 28px 24px; color: white; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.14);">
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.22); backdrop-filter: blur(8px); padding: 4px 12px; border-radius: 9999px; font-size: 0.80rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 8px;">
+                📍 CURATED JOURNEY
+            </div>
+            <h1 style="margin: 0; font-size: 2.3rem; font-weight: 900; color: #ffffff; text-shadow: 0 2px 12px rgba(0,0,0,0.6);">
+                {current['origin']} ➔ {current['destination']}
+            </h1>
+            <p style="margin: 6px 0 0 0; font-size: 1.05rem; opacity: 0.95; text-shadow: 0 1px 6px rgba(0,0,0,0.6);">
+                {current['duration_days']} Days • 👥 {g_size} {'Member' if g_size == 1 else 'Members'} • Travel Style: <b>{current.get('travel_style', 'Balanced')}</b>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
         col_s1, col_s2, col_s3, col_s4, col_s5 = st.columns(5)
         with col_s1:
