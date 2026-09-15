@@ -2,10 +2,12 @@ import os
 import sys
 from pathlib import Path
 
-# Ensure frontend directory is in python search path
+# Ensure root and frontend directories are in python search path
 CURRENT_DIR = Path(__file__).parent.resolve()
-if str(CURRENT_DIR) not in sys.path:
-    sys.path.insert(0, str(CURRENT_DIR))
+ROOT_DIR = CURRENT_DIR.parent.resolve()
+for p in (str(CURRENT_DIR), str(ROOT_DIR)):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 import streamlit as st
 import httpx
@@ -13,6 +15,17 @@ import json
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
+import threading
+import time
+
+# Propagate Streamlit Cloud secrets to environment variables (e.g. GROQ_API_KEY)
+try:
+    if hasattr(st, "secrets"):
+        for k, v in st.secrets.items():
+            if isinstance(v, str):
+                os.environ.setdefault(k, v)
+except Exception:
+    pass
 
 from components.booking_links import render_booking_hub
 from components.export_pdf import generate_pdf_itinerary
@@ -175,10 +188,55 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+@st.cache_resource
+def start_embedded_backend(port: int = 8000) -> str:
+    """
+    Automatically starts the FastAPI backend inside a background daemon thread
+    if not already running. This enables a 100% self-contained Streamlit Cloud
+    deployment without needing Render or any external backend service.
+    """
+    url = f"http://127.0.0.1:{port}"
+    try:
+        r = httpx.get(f"{url}/health", timeout=1.0)
+        if r.status_code == 200:
+            return url
+    except Exception:
+        pass
+
+    try:
+        import uvicorn
+        from backend.app.main import app as fastapi_app
+
+        def run_server():
+            config = uvicorn.Config(fastapi_app, host="127.0.0.1", port=port, log_level="warning")
+            server = uvicorn.Server(config)
+            server.run()
+
+        server_thread = threading.Thread(target=run_server, daemon=True)
+        server_thread.start()
+
+        # Wait briefly for server startup
+        for _ in range(15):
+            try:
+                r = httpx.get(f"{url}/health", timeout=1.0)
+                if r.status_code == 200:
+                    break
+            except Exception:
+                time.sleep(0.3)
+    except Exception as e:
+        print(f"Embedded backend startup notice: {e}")
+
+    return url
+
 try:
-    BACKEND_URL = st.secrets.get("BACKEND_URL", os.getenv("BACKEND_URL", "http://127.0.0.1:8000")).rstrip("/")
+    if hasattr(st, "secrets") and "BACKEND_URL" in st.secrets and st.secrets["BACKEND_URL"]:
+        BACKEND_URL = str(st.secrets["BACKEND_URL"]).rstrip("/")
+    elif os.getenv("BACKEND_URL"):
+        BACKEND_URL = str(os.getenv("BACKEND_URL")).rstrip("/")
+    else:
+        BACKEND_URL = start_embedded_backend(port=8000)
 except Exception:
-    BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
+    BACKEND_URL = start_embedded_backend(port=8000)
 
 # Session State Initialization
 if "current_trip" not in st.session_state:
