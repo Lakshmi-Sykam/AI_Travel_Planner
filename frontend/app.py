@@ -32,6 +32,7 @@ from components.export_pdf import generate_pdf_itinerary
 from components.export_calendar import generate_ics_calendar
 from components.map_view import render_interactive_map
 from components.auth_ui import render_login_page, render_user_profile_sidebar
+from components.flight_animation import render_airplane_flight_animation
 
 # Page configuration
 st.set_page_config(
@@ -504,6 +505,15 @@ with tab_create:
                         st.session_state.agent_logs = data.get("raw_logs", {}).get("logs", [])
                         status.update(label="✈️ Flight & Journey Cleared for Takeoff!", state="complete", expanded=False)
                         
+                        # Live Animated Airplane En Route Flight Track
+                        render_airplane_flight_animation(
+                            origin=origin,
+                            destination=destination,
+                            duration_days=duration_days,
+                            group_size=int(group_size),
+                            budget_str=f"{curr_code} {budget:,.0f}"
+                        )
+                        
                         # High-resolution Flight Takeoff Showcase Card
                         dest_img_url = get_destination_image(destination)
                         st.markdown(f"""
@@ -544,6 +554,15 @@ with tab_itinerary:
         itinerary = current.get("itinerary", {})
         budget_data = itinerary.get("budget_breakdown", {})
         g_size = current.get("group_size", 1)
+
+        # Airplane Flight Trajectory Animation
+        render_airplane_flight_animation(
+            origin=current.get("origin", "Origin"),
+            destination=current.get("destination", "Destination"),
+            duration_days=current.get("duration_days", 1),
+            group_size=g_size,
+            budget_str=f"{current.get('currency', 'INR')} {current.get('budget', 0):,.0f}"
+        )
 
         # Destination Hero Banner Image Card
         dest_hero_img = get_destination_image(current['destination'])
