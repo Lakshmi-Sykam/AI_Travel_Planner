@@ -3,16 +3,15 @@ import streamlit.components.v1 as components
 
 def render_airplane_flight_animation(origin: str, destination: str, duration_days: int = 1, group_size: int = 1, budget_str: str = ""):
     """
-    Renders an animated flight visualization matching the reference illustration.
+    Renders an animated flight visualization of an aeroplane traveling from Origin (Location 1) to Destination (Location 2).
     Features:
-    - Aeroplane moving smoothly from LEFT-BOTTOM to RIGHT-TOP across the sky and globe
-    - Swirling dashed flight trajectory lines wrapping around the Earth globe
-    - Floating white clouds on a clean sky-blue backdrop
-    - Clear Origin and Destination location pins on the globe
-    - Live itinerary route telemetry badge
+    - Departure beacon at Location 1 (Origin) & Arrival beacon at Location 2 (Destination)
+    - Airplane taking off from Location 1, looping around the globe along the flight path, and arriving at Location 2
+    - Trailing dashed flight corridor connecting both locations
+    - Real-time animated flight status telemetry tracker
     """
-    clean_origin = str(origin).replace('"', '&quot;').replace('<', '&lt;')
-    clean_destination = str(destination).replace('"', '&quot;').replace('<', '&lt;')
+    clean_origin = str(origin).strip() if str(origin).strip() else "Origin"
+    clean_destination = str(destination).strip() if str(destination).strip() else "Destination"
 
     html_code = f"""<!DOCTYPE html>
 <html>
@@ -36,16 +35,16 @@ body {{
 .globe-flight-showcase {{
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 14px 36px -8px rgba(71, 140, 204, 0.35), 0 0 0 1.5px rgba(255, 255, 255, 0.8) inset;
+    box-shadow: 0 16px 40px -8px rgba(56, 140, 210, 0.38), 0 0 0 1.5px rgba(255, 255, 255, 0.85) inset;
     background: #ffffff;
     position: relative;
     width: 100%;
 }}
 
-/* Sky Canvas Matching Reference Image */
+/* Sky Canvas Matching Illustration */
 .sky-canvas {{
     background: linear-gradient(180deg, #8dc6eb 0%, #7dbbe4 50%, #88c2ea 100%);
-    height: 400px;
+    height: 420px;
     position: relative;
     overflow: hidden;
     border-radius: 24px;
@@ -59,26 +58,26 @@ body {{
 }}
 
 .fl-cloud-1 {{
-    top: 25px;
-    left: 20%;
+    top: 22px;
+    left: 18%;
     animation: cloudDriftSlow 32s linear infinite;
 }}
 
 .fl-cloud-2 {{
-    top: 85px;
+    top: 90px;
     left: -120px;
     animation: cloudDriftSlow 24s linear infinite 4s;
 }}
 
 .fl-cloud-3 {{
-    top: 40px;
+    top: 35px;
     right: -100px;
     animation: cloudDriftSlow 28s linear infinite 10s;
 }}
 
 .fl-cloud-4 {{
-    top: 170px;
-    left: 6%;
+    top: 180px;
+    left: 4%;
     animation: cloudDriftSlow 22s linear infinite 2s;
 }}
 
@@ -87,27 +86,27 @@ body {{
     100% {{ transform: translateX(1150px); }}
 }}
 
-/* Globe Stage & Sphere */
+/* Globe Stage & Earth Sphere */
 .globe-stage {{
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 330px;
+    height: 340px;
     display: flex;
     align-items: center;
     justify-content: center;
 }}
 
 .earth-sphere {{
-    width: 220px;
-    height: 220px;
+    width: 230px;
+    height: 230px;
     border-radius: 50%;
     background: #d8eefe;
     position: absolute;
-    bottom: 20px;
-    box-shadow: 0 14px 34px rgba(30, 80, 130, 0.22), inset -14px -14px 28px rgba(45, 100, 150, 0.16), inset 8px 8px 22px rgba(255, 255, 255, 0.85);
-    border: 4px solid rgba(255, 255, 255, 0.92);
+    bottom: 22px;
+    box-shadow: 0 16px 36px rgba(30, 80, 130, 0.24), inset -14px -14px 28px rgba(45, 100, 150, 0.16), inset 8px 8px 22px rgba(255, 255, 255, 0.85);
+    border: 4px solid rgba(255, 255, 255, 0.95);
     overflow: visible;
     animation: globeGentleBob 4.5s ease-in-out infinite alternate;
 }}
@@ -136,27 +135,47 @@ body {{
     100% {{ transform: translateX(7px) scale(1.02); }}
 }}
 
-/* Clean Map Pins on Globe with Distinct Badges */
+/* Location 1 & Location 2 Map Pins with Glowing Radar Pulses */
 .globe-pin {{
     position: absolute;
-    z-index: 12;
+    z-index: 14;
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
+}}
+
+.radar-ping {{
+    position: absolute;
+    top: -2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ef4444;
+    animation: radarRipple 2s ease-out infinite;
+}}
+
+@keyframes radarRipple {{
+    0% {{ transform: scale(0.5); opacity: 1; }}
+    100% {{ transform: scale(2.2); opacity: 0; }}
 }}
 
 .pin-head {{
-    width: 24px;
-    height: 32px;
+    width: 26px;
+    height: 34px;
     background: #e85d68;
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     animation: pinHover 2s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+}}
+
+.pin-head.origin-color {{
+    background: #0284c7;
 }}
 
 .pin-head.dest-color {{
@@ -179,32 +198,42 @@ body {{
     transform: rotate(45deg);
 }}
 
+/* Location 1: Origin (Left Side of Globe) */
 .origin-pin {{
-    top: 20px;
-    left: 28px;
+    top: 30px;
+    left: 24px;
 }}
 
+/* Location 2: Destination (Right Side of Globe) */
 .dest-pin {{
-    top: 65px;
-    right: 22px;
+    top: 75px;
+    right: 20px;
 }}
 
 .waypoint-pin {{
-    bottom: 24px;
-    left: 88px;
+    bottom: 22px;
+    left: 92px;
 }}
 
 .pin-badge {{
-    background: rgba(15, 23, 42, 0.88);
+    background: rgba(15, 23, 42, 0.92);
     color: #ffffff;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 800;
-    padding: 2px 7px;
+    padding: 3px 8px;
     border-radius: 6px;
-    margin-top: 5px;
+    margin-top: 6px;
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}}
+
+.origin-badge {{
+    border-left: 3px solid #38bdf8;
+}}
+
+.dest-badge {{
+    border-left: 3px solid #ef4444;
 }}
 
 @keyframes pinHover {{
@@ -212,12 +241,12 @@ body {{
     50% {{ transform: rotate(-45deg) translateY(-6px); }}
 }}
 
-/* Dashed Orbit Trajectory Swirls around the Globe */
+/* Dashed Trajectory connecting Location 1 (Origin) to Location 2 (Destination) */
 .orbit-trails-svg {{
     position: absolute;
     top: 10px;
-    width: 520px;
-    height: 320px;
+    width: 540px;
+    height: 330px;
     pointer-events: none;
     z-index: 6;
 }}
@@ -227,7 +256,7 @@ body {{
 }}
 
 .orbit-dash-secondary {{
-    animation: orbitDashLoop 1.9s linear infinite;
+    animation: orbitDashLoop 1.8s linear infinite;
 }}
 
 @keyframes orbitDashLoop {{
@@ -235,7 +264,7 @@ body {{
     100% {{ stroke-dashoffset: 0; }}
 }}
 
-/* Aeroplane Motion from LEFT-BOTTOM to RIGHT-TOP */
+/* Airplane Vessel Moving from Location 1 (Left-Bottom) to Location 2 (Right-Top) */
 .flying-jet-container {{
     position: absolute;
     top: 0;
@@ -248,60 +277,63 @@ body {{
 
 .jet-motion-wrapper {{
     position: absolute;
-    width: 190px;
-    height: 100px;
-    animation: flightLeftBottomToRightTop 7.5s cubic-bezier(0.35, 0.05, 0.45, 0.95) infinite;
+    width: 200px;
+    height: 110px;
+    animation: flightLocation1ToLocation2 7.5s cubic-bezier(0.35, 0.05, 0.45, 0.95) infinite;
 }}
 
 .modern-airliner-svg {{
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0 16px 20px rgba(15, 45, 80, 0.32));
+    filter: drop-shadow(0 16px 22px rgba(15, 45, 80, 0.35));
 }}
 
-/* Contrail Smoke Trail Extending from Left-Bottom */
+/* Contrail Smoke Trail */
 .jet-contrail {{
     position: absolute;
-    top: 54px;
-    left: -65px;
-    width: 100px;
-    height: 3.5px;
+    top: 58px;
+    left: -70px;
+    width: 110px;
+    height: 4px;
     background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 25%, #ffffff 100%);
     border-radius: 9999px;
-    box-shadow: 0 0 12px rgba(255,255,255,0.95);
+    box-shadow: 0 0 14px rgba(255,255,255,0.95);
     animation: contrailGlow 1.2s infinite alternate;
 }}
 
 @keyframes contrailGlow {{
-    0% {{ opacity: 0.6; width: 80px; }}
-    100% {{ opacity: 1.0; width: 120px; }}
+    0% {{ opacity: 0.6; width: 85px; }}
+    100% {{ opacity: 1.0; width: 130px; }}
 }}
 
-/* Precise Trajectory: Left Bottom (Ascent) -> Above Globe -> Right Top */
-@keyframes flightLeftBottomToRightTop {{
+/* Flight Trajectory Keyframe from Location 1 (Origin) to Location 2 (Destination) */
+@keyframes flightLocation1ToLocation2 {{
     0% {{
         left: -190px;
         top: 290px;
-        transform: scale(0.60) rotate(-12deg);
+        transform: scale(0.60) rotate(-14deg);
         opacity: 0;
     }}
     8% {{
         opacity: 1;
     }}
     30% {{
+        /* Passing above Location 1 (Origin) */
         left: 12%;
-        top: 190px;
-        transform: scale(0.80) rotate(-18deg);
+        top: 185px;
+        transform: scale(0.82) rotate(-18deg);
     }}
     55% {{
+        /* Mid-flight altitude over globe */
         left: 36%;
-        top: 90px;
-        transform: scale(0.98) rotate(-24deg);
+        top: 85px;
+        transform: scale(1.0) rotate(-24deg);
     }}
     78% {{
-        left: 64%;
-        top: 25px;
-        transform: scale(1.12) rotate(-26deg);
+        /* Cruising towards Location 2 (Destination) */
+        left: 65%;
+        top: 20px;
+        transform: scale(1.15) rotate(-26deg);
         opacity: 1;
     }}
     94% {{
@@ -309,24 +341,24 @@ body {{
     }}
     100% {{
         left: calc(100% + 190px);
-        top: -65px;
-        transform: scale(1.22) rotate(-28deg);
+        top: -70px;
+        transform: scale(1.24) rotate(-28deg);
         opacity: 0;
     }}
 }}
 
-/* Bottom Itinerary Route Bar */
+/* Bottom Route Strip with Live Flight Progress Indicator */
 .flight-route-strip {{
     position: absolute;
     bottom: 12px;
     left: 18px;
     right: 18px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border: 1.5px solid rgba(255, 255, 255, 0.95);
     border-radius: 16px;
-    padding: 9px 20px;
+    padding: 10px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -345,8 +377,8 @@ body {{
     background: #eff6ff;
     border: 1.5px solid #bfdbfe;
     border-radius: 10px;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -360,7 +392,7 @@ body {{
 }}
 
 .badge-city {{
-    font-size: 1.0rem;
+    font-size: 1.05rem;
     font-weight: 900;
     color: #0f172a;
 }}
@@ -373,15 +405,15 @@ body {{
 }}
 
 .route-status {{
-    font-size: 0.74rem;
+    font-size: 0.76rem;
     font-weight: 800;
     color: #0284c7;
     letter-spacing: 0.6px;
 }}
 
 .route-line-anim {{
-    width: 140px;
-    height: 3px;
+    width: 160px;
+    height: 4px;
     background: linear-gradient(90deg, #38bdf8, #0284c7, #38bdf8);
     border-radius: 9999px;
     position: relative;
@@ -405,19 +437,19 @@ body {{
 }}
 
 @media (max-width: 680px) {{
-    .sky-canvas {{ height: 430px; }}
+    .sky-canvas {{ height: 440px; }}
     .earth-sphere {{ width: 170px; height: 170px; bottom: 85px; }}
     .orbit-trails-svg {{ width: 340px; }}
     .flight-route-strip {{ flex-direction: column; gap: 8px; align-items: flex-start; }}
     .route-line-anim {{ width: 100%; }}
-    .jet-motion-wrapper {{ width: 140px; height: 75px; }}
+    .jet-motion-wrapper {{ width: 150px; height: 80px; }}
 }}
 </style>
 </head>
 <body>
     <div class="globe-flight-showcase">
         <div class="sky-canvas">
-            <!-- Floating Clouds -->
+            <!-- Floating Stratosphere Clouds -->
             <div class="fl-cloud fl-cloud-1">
                 <svg viewBox="0 0 100 60" width="85" height="51">
                     <path d="M20,45 A15,15 0 0,1 32,25 A22,22 0 0,1 68,22 A18,18 0 0,1 85,45 Z" fill="#FFFFFF" opacity="0.95"/>
@@ -441,8 +473,8 @@ body {{
 
             <!-- Central Orbit & Globe Stage -->
             <div class="globe-stage">
-                <!-- Orbit Swirl Trajectory Lines Wrapping from Bottom-Left around Globe to Top-Right -->
-                <svg class="orbit-trails-svg" viewBox="0 0 520 320" preserveAspectRatio="xMidYMid meet">
+                <!-- Flight Orbit Lines Connecting Location 1 to Location 2 -->
+                <svg class="orbit-trails-svg" viewBox="0 0 540 330" preserveAspectRatio="xMidYMid meet">
                     <defs>
                         <linearGradient id="orbitGrad1" x1="0%" y1="100%" x2="100%" y2="0%">
                             <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
@@ -450,15 +482,13 @@ body {{
                             <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
                         </linearGradient>
                     </defs>
-                    <!-- Lower orbit loop -->
                     <path d="M 80,270 C 40,230 110,185 260,205 C 380,225 450,265 390,290 C 330,310 170,295 130,250" 
                           fill="none" stroke="url(#orbitGrad1)" stroke-width="2.5" stroke-dasharray="8,8" class="orbit-dash-primary" />
-                    <!-- Ascending orbit curve from bottom-left wrapping around globe to top-right -->
                     <path d="M 130,250 C 95,200 190,145 350,155 C 445,162 475,195 435,225 C 380,250 235,220 170,150 C 110,90 220,35 430,25" 
                           fill="none" stroke="url(#orbitGrad1)" stroke-width="3" stroke-dasharray="10,8" class="orbit-dash-secondary" />
                 </svg>
 
-                <!-- 3D Style Globe Sphere -->
+                <!-- Earth Globe -->
                 <div class="earth-sphere">
                     <div class="globe-ocean">
                         <svg class="continents-svg" viewBox="0 0 240 240">
@@ -469,23 +499,25 @@ body {{
                         </svg>
                     </div>
 
-                    <!-- Origin Pin -->
-                    <div class="globe-pin origin-pin" title="Departure: {clean_origin}">
-                        <div class="pin-head">
+                    <!-- Location 1 Pin (Departure / Origin) -->
+                    <div class="globe-pin origin-pin">
+                        <div class="radar-ping"></div>
+                        <div class="pin-head origin-color">
                             <div class="pin-dot"></div>
                         </div>
-                        <div class="pin-badge">🛫 {clean_origin}</div>
+                        <div class="pin-badge origin-badge">🛫 {clean_origin}</div>
                     </div>
 
-                    <!-- Destination Pin -->
-                    <div class="globe-pin dest-pin" title="Destination: {clean_destination}">
+                    <!-- Location 2 Pin (Arrival / Destination) -->
+                    <div class="globe-pin dest-pin">
+                        <div class="radar-ping"></div>
                         <div class="pin-head dest-color">
                             <div class="pin-dot"></div>
                         </div>
-                        <div class="pin-badge">🛬 {clean_destination}</div>
+                        <div class="pin-badge dest-badge">🛬 {clean_destination}</div>
                     </div>
 
-                    <!-- Waypoint Pin -->
+                    <!-- Mid-route Waypoint Pin -->
                     <div class="globe-pin waypoint-pin">
                         <div class="pin-head waypoint-color">
                             <div class="pin-dot"></div>
@@ -493,7 +525,7 @@ body {{
                     </div>
                 </div>
 
-                <!-- Modern Commercial Airliner Moving from LEFT-BOTTOM to RIGHT-TOP -->
+                <!-- Modern Commercial Airliner Moving from Location 1 to Location 2 -->
                 <div class="flying-jet-container">
                     <div class="jet-motion-wrapper">
                         <!-- Jet Contrail Smoke Trail -->
@@ -560,23 +592,23 @@ body {{
                 </div>
             </div>
 
-            <!-- Route Banner Bar Overlay -->
+            <!-- Route Banner Bar Overlay with Departure & Arrival -->
             <div class="flight-route-strip">
                 <div class="route-badge departure-badge">
                     <span class="badge-icon">🛫</span>
                     <div>
-                        <div class="badge-label">DEPARTURE</div>
+                        <div class="badge-label">LOCATION 1 (ORIGIN)</div>
                         <div class="badge-city">{clean_origin}</div>
                     </div>
                 </div>
                 <div class="route-connector">
                     <span class="route-line-anim"></span>
-                    <span class="route-status">✈️ AI ITINERARY ACTIVE</span>
+                    <span class="route-status">✈️ FLIGHT EN ROUTE</span>
                 </div>
                 <div class="route-badge arrival-badge">
                     <span class="badge-icon">🛬</span>
                     <div>
-                        <div class="badge-label">DESTINATION</div>
+                        <div class="badge-label">LOCATION 2 (DESTINATION)</div>
                         <div class="badge-city">{clean_destination}</div>
                     </div>
                 </div>
@@ -586,4 +618,4 @@ body {{
 </body>
 </html>
 """
-    components.html(html_code, height=415, scrolling=False)
+    components.html(html_code, height=435, scrolling=False)
