@@ -463,6 +463,15 @@ with tab_create:
         if not origin or not destination:
             st.error("Please enter both origin and destination.")
         else:
+            # ✈️ Display Animated Airplane Journey from Origin to Destination Immediately upon clicking
+            render_airplane_flight_animation(
+                origin=origin,
+                destination=destination,
+                duration_days=duration_days,
+                group_size=int(group_size),
+                budget_str=f"{curr_code} {budget:,.0f}"
+            )
+
             with st.status(f"🤖 Multi-Agent Orchestrator planning for {group_size} travelers ({preferred_transport})...", expanded=True) as status:
                 st.write("🔍 **Tool Orchestrator:** Analyzing weather trends & calculating budget distribution...")
                 st.write(f"✈️ **Travel Agent:** Scouting optimal transit routes ({preferred_transport}) & pricing...")
@@ -504,15 +513,6 @@ with tab_create:
                         }
                         st.session_state.agent_logs = data.get("raw_logs", {}).get("logs", [])
                         status.update(label="✈️ Flight & Journey Cleared for Takeoff!", state="complete", expanded=False)
-                        
-                        # Live Animated Airplane En Route Flight Track
-                        render_airplane_flight_animation(
-                            origin=origin,
-                            destination=destination,
-                            duration_days=duration_days,
-                            group_size=int(group_size),
-                            budget_str=f"{curr_code} {budget:,.0f}"
-                        )
                         
                         # High-resolution Flight Takeoff Showcase Card
                         dest_img_url = get_destination_image(destination)
