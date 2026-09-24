@@ -136,26 +136,34 @@ st.markdown("""
         box-shadow: 0 8px 20px rgba(2, 132, 199, 0.12) !important;
     }
 
-    /* Modern Tabs Styling */
-    div[data-baseweb="tab-list"] {
-        background: rgba(241, 245, 249, 0.85) !important;
-        backdrop-filter: blur(10px) !important;
+    /* Segmented Navigation Bar Pills */
+    div[data-testid="stRadio"] {
+        margin-bottom: 1.5rem !important;
+    }
+    div[data-testid="stRadio"] > div {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 10px !important;
+        background: rgba(241, 245, 249, 0.95) !important;
+        backdrop-filter: blur(12px) !important;
         padding: 6px !important;
         border-radius: 14px !important;
-        border: 1px solid rgba(203, 213, 225, 0.8) !important;
-        gap: 8px !important;
+        border: 1.5px solid rgba(203, 213, 225, 0.8) !important;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05) !important;
+        justify-content: center !important;
     }
-    div[data-baseweb="tab"] {
+    div[data-testid="stRadio"] label {
+        background: transparent !important;
         border-radius: 10px !important;
-        font-weight: 700 !important;
-        padding: 10px 20px !important;
-        color: #475569 !important;
+        padding: 8px 18px !important;
+        cursor: pointer !important;
         transition: all 0.2s ease !important;
+        font-weight: 700 !important;
+        color: #334155 !important;
     }
-    div[data-baseweb="tab"][aria-selected="true"] {
-        background: #0284c7 !important;
-        color: #ffffff !important;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35) !important;
+    div[data-testid="stRadio"] label:hover {
+        background: rgba(2, 132, 199, 0.12) !important;
+        color: #0284c7 !important;
     }
 
     /* Badges */
@@ -250,6 +258,8 @@ if "auth_token" not in st.session_state:
     st.session_state.auth_token = None
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "✨ Plan New Trip"
 
 # Gating: Display Authentication Page FIRST if user is not logged in
 if not st.session_state.auth_token or not st.session_state.user_info:
@@ -350,6 +360,7 @@ with st.sidebar:
                 label = f"📍 {trip['origin']} ➔ {trip['destination']} ({trip['duration_days']}D)"
                 if st.button(label, key=f"trip_btn_{trip['id']}", use_container_width=True):
                     st.session_state.current_trip = trip
+                    st.session_state.active_tab = "📋 Itinerary Dashboard"
                     st.rerun()
             with t_col2:
                 if st.button("🗑️", key=f"del_btn_{trip['id']}", help="Delete trip"):
@@ -378,11 +389,23 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Tabs
-tab_create, tab_itinerary, tab_refine = st.tabs(["✨ Plan New Trip", "📋 Itinerary Dashboard", "💬 Modify Plan"])
+# Navigation Bar
+nav_options = ["✨ Plan New Trip", "📋 Itinerary Dashboard", "💬 Modify Plan"]
+if "active_tab" not in st.session_state or st.session_state.active_tab not in nav_options:
+    st.session_state.active_tab = "✨ Plan New Trip"
+
+active_tab = st.radio(
+    "Navigation",
+    nav_options,
+    index=nav_options.index(st.session_state.active_tab),
+    horizontal=True,
+    label_visibility="collapsed",
+    key="main_nav_tab_radio"
+)
+st.session_state.active_tab = active_tab
 
 # TAB 1: Plan New Trip
-with tab_create:
+if active_tab == "✨ Plan New Trip":
     st.subheader("🎯 Configure Your Journey")
     
     with st.form("trip_form"):
@@ -512,32 +535,9 @@ with tab_create:
                             "itinerary": data["itinerary"]
                         }
                         st.session_state.agent_logs = data.get("raw_logs", {}).get("logs", [])
-                        status.update(label="✈️ Flight & Journey Cleared for Takeoff!", state="complete", expanded=False)
-                        
-                        # High-resolution Flight Takeoff Showcase Card
-                        dest_img_url = get_destination_image(destination)
-                        st.markdown(f"""
-                        <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(2, 132, 199, 0.82) 100%), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; border-radius: 18px; padding: 26px; color: white; margin: 18px 0; box-shadow: 0 12px 30px rgba(2, 132, 199, 0.25); border: 1.5px solid rgba(56, 189, 248, 0.4);">
-                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px;">
-                                <div>
-                                    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.25); border: 1px solid #38bdf8; color: #e0f2fe; padding: 4px 14px; border-radius: 9999px; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.6px; margin-bottom: 10px;">
-                                        ✈️ FLIGHT & ROUTE READY FOR TAKEOFF
-                                    </div>
-                                    <h2 style="margin: 0; font-size: 2.0rem; font-weight: 900; color: #ffffff; text-shadow: 0 3px 12px rgba(0,0,0,0.6);">
-                                        🛫 {origin} ➔ 🛬 {destination}
-                                    </h2>
-                                    <p style="margin: 8px 0 0 0; font-size: 1.05rem; opacity: 0.95; text-shadow: 0 2px 6px rgba(0,0,0,0.6);">
-                                        {duration_days} Days Adventure • 👥 {group_size} {'Traveler' if int(group_size)==1 else 'Travelers'} • Budget: <b>{curr_code} {budget:,.0f}</b>
-                                    </p>
-                                </div>
-                                <div style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(10px); padding: 14px 22px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.25); text-align: center;">
-                                    <div style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Next Step</div>
-                                    <div style="font-size: 1.05rem; color: #38bdf8; font-weight: 800; margin-top: 2px;">Switch to Tab 2 📋</div>
-                                    <div style="font-size: 0.78rem; color: #e2e8f0; margin-top: 2px;">View Day Plans & Map</div>
-                                </div>
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        status.update(label="✈️ Journey Planned! Redirecting to Itinerary Dashboard...", state="complete", expanded=False)
+                        st.session_state.active_tab = "📋 Itinerary Dashboard"
+                        st.rerun()
                     else:
                         status.update(label="❌ Failed to generate plan", state="error")
                         st.error(f"Error {res.status_code}: {res.text}")
@@ -546,7 +546,7 @@ with tab_create:
                     st.error(f"Could not connect to backend: {e}")
 
 # TAB 2: Itinerary Dashboard
-with tab_itinerary:
+elif active_tab == "📋 Itinerary Dashboard":
     current = st.session_state.current_trip
     if not current:
         st.info("👈 Please create a plan in the 'Plan New Trip' tab or select a saved trip from the sidebar.")
@@ -794,7 +794,7 @@ with tab_itinerary:
             )
 
 # TAB 3: Modify Plan
-with tab_refine:
+elif active_tab == "💬 Modify Plan":
     st.subheader("💬 Refine & Modify Itinerary")
     if not st.session_state.current_trip:
         st.info("Please generate or select a trip first before modifying.")
@@ -820,7 +820,8 @@ with tab_refine:
                         if res.status_code == 200:
                             updated_data = res.json()
                             st.session_state.current_trip["itinerary"] = updated_data["updated_itinerary"]
-                            st.success("✅ Itinerary updated successfully! Check the 'Itinerary Dashboard' tab.")
+                            st.success("✅ Itinerary updated successfully! Redirecting to dashboard...")
+                            st.session_state.active_tab = "📋 Itinerary Dashboard"
                             st.rerun()
                         else:
                             st.error(f"Error {res.status_code}: {res.text}")

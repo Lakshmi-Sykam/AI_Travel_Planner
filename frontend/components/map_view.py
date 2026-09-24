@@ -141,6 +141,92 @@ def resolve_city(name: str, fallback=(15.2993, 74.1240)):
 
 resolve_location = resolve_city
 
+# Accurate Regional Landmarks (anchored within destination zones)
+LANDMARK_COORDINATES = {
+    # Goa Landmarks & Beaches
+    "panaji": (15.4909, 73.8278),
+    "panjim": (15.4909, 73.8278),
+    "baga": (15.5553, 73.7517),
+    "baga beach": (15.5553, 73.7517),
+    "calangute": (15.5439, 73.7553),
+    "calangute beach": (15.5439, 73.7553),
+    "anjuna": (15.5800, 73.7400),
+    "anjuna beach": (15.5800, 73.7400),
+    "vagator": (15.5997, 73.7380),
+    "vagator beach": (15.5997, 73.7380),
+    "candolim": (15.5186, 73.7663),
+    "candolim beach": (15.5186, 73.7663),
+    "aguada": (15.4925, 73.7736),
+    "fort aguada": (15.4925, 73.7736),
+    "chapora": (15.6058, 73.7358),
+    "chapora fort": (15.6058, 73.7358),
+    "old goa": (15.5030, 73.9110),
+    "bom jesus": (15.5009, 73.9116),
+    "basilica of bom jesus": (15.5009, 73.9116),
+    "dudhsagar": (15.3144, 74.3143),
+    "dudhsagar waterfalls": (15.3144, 74.3143),
+    "palolem": (15.0100, 74.0232),
+    "palolem beach": (15.0100, 74.0232),
+    "colva": (15.2783, 73.9167),
+    "colva beach": (15.2783, 73.9167),
+    "miramar": (15.4833, 73.8117),
+    "miramar beach": (15.4833, 73.8117),
+    "fontainhas": (15.4960, 73.8320),
+    "arambol": (15.6853, 73.7042),
+    "morjim": (15.6322, 73.7297),
+    "mandovi": (15.4990, 73.8250),
+    "mandovi river": (15.4990, 73.8250),
+    "donapaula": (15.4539, 73.8052),
+    "dona paula": (15.4539, 73.8052),
+    "sinquerim": (15.4980, 73.7690),
+    "benaulim": (15.2580, 73.9210),
+    "salcete": (15.2900, 73.9800),
+
+    # Andhra Pradesh & Vijayawada Landmarks
+    "kanaka durga": (16.5161, 80.6094),
+    "prakasam barrage": (16.5073, 80.6053),
+    "undavalli": (16.4967, 80.5802),
+    "undavalli caves": (16.4967, 80.5802),
+    "bhavani island": (16.5226, 80.5901),
+    "mangalagiri": (16.4357, 80.5694),
+    "rishi konda": (17.7816, 83.3853),
+    "kailasagiri": (17.7490, 83.3422),
+    "araku": (18.3273, 82.8775),
+    "araku valley": (18.3273, 82.8775),
+    "borra caves": (18.2804, 83.0396),
+
+    # Delhi Landmarks
+    "india gate": (28.6129, 77.2295),
+    "qutub minar": (28.5245, 77.1855),
+    "red fort": (28.6562, 77.2410),
+    "lotus temple": (28.5535, 77.2588),
+    "humayun tomb": (28.5933, 77.2507),
+    "akshardham": (28.6127, 77.2773),
+
+    # Mumbai Landmarks
+    "gateway of india": (18.9220, 72.8347),
+    "marine drive": (18.9432, 72.8230),
+    "juhu beach": (19.0988, 72.8264),
+    "bandra bandstand": (19.0473, 72.8197),
+    "elephanta caves": (18.9633, 72.9315),
+    "colaba": (18.9067, 72.8147),
+
+    # Jaipur Landmarks
+    "hawa mahal": (26.9239, 75.8267),
+    "amber fort": (26.9855, 75.8513),
+    "city palace": (26.9258, 75.8237),
+    "jal mahal": (26.9656, 75.8456),
+    "nahargarh": (26.9373, 75.8156),
+
+    # Kerala Landmarks
+    "tea museum": (10.0889, 77.0595),
+    "mattupetty": (10.1062, 77.1246),
+    "eravikulam": (10.2033, 77.0850),
+    "vembanad": (9.5833, 76.4167),
+    "fort kochi": (9.9658, 76.2421),
+    "jew town": (9.9579, 76.2597),
+}
+
 def resolve_activity_location(name: str, dest_center: tuple, offset_seed: int = 0):
     """
     Resolve local activity and hotel coordinates.
@@ -149,7 +235,8 @@ def resolve_activity_location(name: str, dest_center: tuple, offset_seed: int = 
     clean = str(name).lower().strip()
 
     # 1. Match local destination landmarks first
-    for landmark, coords in LANDMARK_COORDINATES.items():
+    landmarks = globals().get("LANDMARK_COORDINATES", {})
+    for landmark, coords in landmarks.items():
         if re.search(rf"\b{re.escape(landmark)}\b", clean):
             return coords
 
