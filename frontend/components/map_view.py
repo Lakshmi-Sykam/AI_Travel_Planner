@@ -5,30 +5,84 @@ from streamlit_folium import st_folium
 
 # Major City Coordinates (for Origin and Destination resolution)
 CITY_COORDINATES = {
+    # Andhra Pradesh & Telangana
+    "vijayawada": (16.5062, 80.6480),
+    "visakhapatnam": (17.6868, 83.2185),
+    "vizag": (17.6868, 83.2185),
+    "guntur": (16.3067, 80.4365),
+    "amaravati": (16.5417, 80.5158),
+    "tirupati": (13.6288, 79.4192),
+    "rajahmundry": (17.0005, 81.8040),
+    "kakinada": (16.9891, 82.2475),
+    "nellore": (14.4426, 79.9865),
+    "kurnool": (15.8281, 78.0373),
+    "kadapa": (14.4673, 78.8242),
+    "anantapur": (14.6819, 77.6006),
+    "hyderabad": (17.3850, 78.4867),
+    "warangal": (17.9689, 79.5941),
+    "secunderabad": (17.4399, 78.4983),
+    
+    # Major Indian Metro & Popular Cities
     "goa": (15.2993, 74.1240),
     "mumbai": (19.0760, 72.8777),
     "delhi": (28.6139, 77.2090),
     "new delhi": (28.6139, 77.2090),
     "bangalore": (12.9716, 77.5946),
     "bengaluru": (12.9716, 77.5946),
-    "hyderabad": (17.3850, 78.4867),
     "chennai": (13.0827, 80.2707),
     "kolkata": (22.5726, 88.3639),
+    "pune": (18.5204, 73.8567),
+    "ahmedabad": (23.0225, 72.5714),
+    "surat": (21.1702, 72.8311),
     "jaipur": (26.9124, 75.7873),
     "udaipur": (24.5854, 73.7125),
+    "jodhpur": (26.2389, 73.0243),
+    "jaisalmer": (26.9157, 70.9083),
     "manali": (32.2432, 77.1892),
     "shimla": (31.1048, 77.1734),
     "kerala": (10.8505, 76.2711),
     "munnar": (10.0889, 77.0595),
     "kochi": (9.9312, 76.2673),
+    "cochin": (9.9312, 76.2673),
+    "thiruvananthapuram": (8.5241, 76.9366),
+    "trivandrum": (8.5241, 76.9366),
+    "kozhikode": (11.2588, 75.7804),
+    "wayanad": (11.6854, 76.1320),
+    "alleppey": (9.4981, 76.3388),
+    "alappuzha": (9.4981, 76.3388),
+    "varkala": (8.7379, 76.7163),
     "agra": (27.1767, 78.0081),
     "varanasi": (25.3176, 82.9739),
     "amritsar": (31.6340, 74.8723),
     "rishikesh": (30.0869, 78.2676),
-    "pune": (18.5204, 73.8567),
-    "tirupati": (13.6288, 79.4192),
+    "haridwar": (29.9457, 78.1642),
+    "dehradun": (30.3165, 78.0322),
     "ooty": (11.4102, 76.6950),
     "kodaikanal": (10.2381, 77.4892),
+    "coimbatore": (11.0168, 76.9558),
+    "madurai": (9.9252, 78.1198),
+    "mysore": (12.2958, 76.6394),
+    "mysuru": (12.2958, 76.6394),
+    "mangalore": (12.9141, 74.8560),
+    "bhubaneswar": (20.2961, 85.8245),
+    "puri": (19.8135, 85.8312),
+    "patna": (25.5941, 85.1376),
+    "lucknow": (26.8467, 80.9462),
+    "kanpur": (26.4499, 80.3319),
+    "bhopal": (23.2599, 77.4126),
+    "indore": (22.7196, 75.8577),
+    "nagpur": (21.1458, 79.0882),
+    "nashik": (19.9975, 73.7898),
+    "aurangabad": (19.8762, 75.3433),
+    "chandigarh": (30.7333, 76.7794),
+    "guwahati": (26.1445, 91.7362),
+    "shillong": (25.5788, 91.8933),
+    "gangtok": (27.3314, 88.6138),
+    "srinagar": (34.0837, 74.7973),
+    "leh": (34.1526, 77.5771),
+    "ladakh": (34.1526, 77.5771),
+
+    # International Hubs
     "paris": (48.8566, 2.3522),
     "london": (51.5074, -0.1278),
     "tokyo": (35.6762, 139.6503),
@@ -44,48 +98,48 @@ CITY_COORDINATES = {
     "barcelona": (41.3879, 2.1699),
 }
 
-# Accurate Regional Landmarks (anchored within destination zones)
-LANDMARK_COORDINATES = {
-    # Goa Landmarks
-    "panaji": (15.4909, 73.8278),
-    "panjim": (15.4909, 73.8278),
-    "baga": (15.5553, 73.7517),
-    "calangute": (15.5439, 73.7553),
-    "anjuna": (15.5800, 73.7400),
-    "vagator": (15.5997, 73.7380),
-    "candolim": (15.5186, 73.7663),
-    "aguada": (15.4925, 73.7736),
-    "chapora": (15.6058, 73.7358),
-    "old goa": (15.5030, 73.9110),
-    "bom jesus": (15.5009, 73.9116),
-    "dudhsagar": (15.3144, 74.3143),
-    "palolem": (15.0100, 74.0232),
-    "colva": (15.2783, 73.9167),
-    "miramar": (15.4833, 73.8117),
-    "fontainhas": (15.4960, 73.8320),
-    "arambol": (15.6853, 73.7042),
-    "morjim": (15.6322, 73.7297),
-    "mandovi": (15.4990, 73.8250),
-    "south goa": (15.2500, 74.0000),
-    "north goa": (15.5500, 73.7600),
-    "promenade": (15.4950, 73.8300),
-    "donapaula": (15.4539, 73.8052),
-    "dona paula": (15.4539, 73.8052),
-    "sinquerim": (15.4980, 73.7690),
-    "benaulim": (15.2580, 73.9210),
-    "salcete": (15.2900, 73.9800),
-}
+@st.cache_data(show_spinner=False, ttl=86400)
+def geocode_city_online(query: str):
+    """
+    Dynamic geocoding fallback using OpenStreetMap Nominatim for unlisted cities/towns.
+    Cached for fast subsequent lookups.
+    """
+    try:
+        import httpx
+        url = "https://nominatim.openstreetmap.org/search"
+        headers = {"User-Agent": "AITravelPlanner/1.0"}
+        params = {"q": query, "format": "json", "limit": 1}
+        response = httpx.get(url, params=params, headers=headers, timeout=2.0)
+        if response.status_code == 200:
+            data = response.json()
+            if data and len(data) > 0:
+                return (float(data[0]["lat"]), float(data[0]["lon"]))
+    except Exception:
+        pass
+    return None
 
 def resolve_city(name: str, fallback=(15.2993, 74.1240)):
     """
-    Resolve origin and destination using exact word boundary matching.
-    Prevents false substring matches like 'rome' matching 'promenade'.
+    Resolve origin and destination using exact word boundary matching,
+    followed by dynamic online geocoding if not found in local catalog.
     """
+    if not name:
+        return fallback
     clean = str(name).lower().strip()
+    
+    # 1. Match from local catalog
     for city, coords in CITY_COORDINATES.items():
         if re.search(rf"\b{re.escape(city)}\b", clean):
             return coords
+            
+    # 2. Dynamic geocoding fallback
+    online_coords = geocode_city_online(clean)
+    if online_coords:
+        return online_coords
+        
     return fallback
+
+resolve_location = resolve_city
 
 def resolve_activity_location(name: str, dest_center: tuple, offset_seed: int = 0):
     """
@@ -137,6 +191,8 @@ def render_interactive_map(itinerary: dict, origin: str, destination: str):
             tooltip=f"Origin: {origin}",
             icon=folium.Icon(color="gray", icon="plane", prefix="fa")
         ).add_to(m)
+
+        m.fit_bounds([origin_coords, dest_center], padding=(40, 40))
 
     circuit_points = [dest_center]
 
